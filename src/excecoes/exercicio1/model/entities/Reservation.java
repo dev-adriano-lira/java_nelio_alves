@@ -1,5 +1,7 @@
 package excecoes.exercicio1.model.entities;
 
+import excecoes.exercicio1.model.exceptions.DomainException;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -8,32 +10,34 @@ public class Reservation {
 
     private Integer roomNumber;
     private Date checkIn;
-    private Date ckeckOut;
+    private Date checkOut;
 
     private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
-    public Reservation(Integer roomNumber, Date checkIn, Date ckeckOut) {
+    public Reservation(Integer roomNumber, Date checkIn, Date checkOut) throws DomainException {
+        if(!checkOut.after(checkIn)) {
+            throw new DomainException("Check-ot must be after check-in date");
+        }
         this.roomNumber = roomNumber;
         this.checkIn = checkIn;
-        this.ckeckOut = ckeckOut;
+        this.checkOut = checkOut;
     }
 
     public long duration() {
-        long diff = ckeckOut.getTime() - checkIn.getTime();
+        long diff = checkOut.getTime() - checkIn.getTime();
         return TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
     }
 
-    public String updateDates(Date checkIn, Date checkOut) {
+    public void updateDates(Date checkIn, Date checkOut) throws DomainException {
         Date now = new Date();
         if (checkIn.before(now) || checkOut.before(now)) {
-            return "Reservation dates for update must be future dates";
+            throw new DomainException("Reservation dates for update must be future dates");
         }
         if(!checkOut.after(checkIn)) {
-            return "Check-ot must be after check-in date";
+            throw new DomainException("Check-ot must be after check-in date");
         }
         this.checkIn = checkIn;
-        this.ckeckOut = checkOut;
-        return null;
+        this.checkOut = checkOut;
     }
 
     public Integer getRoomNumber() {
@@ -48,8 +52,8 @@ public class Reservation {
         return checkIn;
     }
 
-    public Date getCkeckOut() {
-        return ckeckOut;
+    public Date getCheckOut() {
+        return checkOut;
     }
 
     @Override
@@ -59,7 +63,7 @@ public class Reservation {
                 + ", check-in: "
                 + sdf.format(checkIn)
                 + ", check-out: "
-                + sdf.format(ckeckOut)
+                + sdf.format(checkOut)
                 + ", "
                 + duration()
                 + " nights";
